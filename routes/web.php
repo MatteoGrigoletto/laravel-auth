@@ -14,6 +14,10 @@ use App\Http\Controllers\Admin\ProjectController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/', function () {
+    return view('welcome');
+});
+
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -21,7 +25,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
-    Route::resource('projects', ProjectController::class)->parameters(['projects'=>'project:slug']);
+    Route::resource('projects', ProjectController::class)->parameters(['projects'=>'projects:slug']);
 });
 
 require __DIR__.'/auth.php';

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Project;
+use App\Http\Requests\StoreProjectRequest;
+use App\Http\Requests\UpdateProjectRequest;
 
 class ProjectController extends Controller
 {
@@ -18,7 +20,7 @@ class ProjectController extends Controller
     {
         $projects = Project::all();
         
-        return view('admin.project.index', compact('projects'));
+        return view('admin.projects.index', compact('projects'));
     }
 
     /**
@@ -28,7 +30,7 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.projects.create');
     }
 
     /**
@@ -37,9 +39,14 @@ class ProjectController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreProjectRequest $request)
     {
-        //
+        $data=$request->validated();
+        $new_project= new Project();
+        $new_project->fill($data);
+        $new_project->slug=Str::slug($new_project->name,'-');
+        $new_project->save();
+        return redirect()->route('admin.projects.index')->with('message',"Project '$new_project->names'");
     }
 
     /**
@@ -48,9 +55,10 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Project $projects)
     {
-        //
+        // dd($projects);
+        return view('admin.projects.show',compact('projects'));
     }
 
     /**
@@ -59,9 +67,9 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Project $projects)
     {
-        //
+        return view('admin.projects.edit',compact('projects'));
     }
 
     /**
@@ -71,9 +79,13 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateProjectRequest $request, Project $projects)
     {
-        //
+        $old_name=$projects->name;
+        $data=$request->validated();
+        $projects->slug = Str::slug($data['name'],'-');
+        $projects->update($data);
+        return redirect()->route('admin.projects.index')->with('message',"Project '$old_name' updated.");
     }
 
     /**
@@ -82,8 +94,10 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Project $projects)
     {
-        //
+        $old_name=$projects->name;
+        $projects->delete();
+        return redirect()->route('admin.projects.index')->with('message',"Project '$old_name' deleted.");
     }
 }
